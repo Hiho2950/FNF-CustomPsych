@@ -60,6 +60,7 @@ jobs:
           haxelib --quiet install hxjsonast
           haxelib --quiet install hscript
           haxelib --quiet install hxCodec 2.5.1
+          haxelib --quiet install SScript
           haxelib --quiet git linc_luajit https://github.com/Sirox228/linc_luajit
           haxelib --quiet git extension-androidtools https://github.com/MaysLastPlay77/extension-androidtools
           haxelib --quiet install hxcpp-debug-server
