@@ -1417,7 +1417,6 @@ class PlayState extends MusicBeatState
 				daNote.visible = false;
 				daNote.ignoreNote = true;
 
-				daNote.kill();
 				unspawnNotes.remove(daNote);
 				daNote.destroy();
 			}
@@ -1433,7 +1432,6 @@ class PlayState extends MusicBeatState
 				daNote.visible = false;
 				daNote.ignoreNote = true;
 
-				daNote.kill();
 				notes.remove(daNote, true);
 				daNote.destroy();
 			}
@@ -2172,7 +2170,7 @@ class PlayState extends MusicBeatState
 						if(!daNote.blockHit && daNote.mustPress && cpuControlled && daNote.canBeHit) {
 							if(daNote.isSustainNote) {
 								if(daNote.canBeHit) {
-									goodNoteHit(daNote);
+									goodNoteHitOptimized(daNote);
 								}
 							} else if(daNote.strumTime <= Conductor.songPosition || daNote.isSustainNote) {
 								goodNoteHit(daNote);
@@ -2217,7 +2215,6 @@ class PlayState extends MusicBeatState
 							daNote.active = false;
 							daNote.visible = false;
 
-							daNote.kill();
 							notes.remove(daNote, true);
 							daNote.destroy();
 						}
@@ -2833,7 +2830,6 @@ class PlayState extends MusicBeatState
 			daNote.active = false;
 			daNote.visible = false;
 
-			daNote.kill();
 			notes.remove(daNote, true);
 			daNote.destroy();
 		}
@@ -2919,7 +2915,7 @@ class PlayState extends MusicBeatState
 			pixelShitPart1 = 'pixelUI/';
 			pixelShitPart2 = '-pixel';
 		}
-
+	if (!cpuControlled && !ClientPrefs.lesslag) {
 		rating.loadGraphic(Paths.image(pixelShitPart1 + daRating.image + pixelShitPart2));
 		rating.cameras = [camHUD];
 		rating.screenCenter();
@@ -3065,6 +3061,7 @@ class PlayState extends MusicBeatState
 			startDelay: Conductor.crochet * 0.002 / playbackRate
 		});
 	}
+	}
 
 	public var strumsBlocked:Array<Bool> = [];
 	private function onKeyPress(event:KeyboardEvent):Void
@@ -3108,7 +3105,6 @@ class PlayState extends MusicBeatState
 					{
 						for (doubleNote in pressNotes) {
 							if (Math.abs(doubleNote.strumTime - epicNote.strumTime) < 1) {
-								doubleNote.kill();
 								notes.remove(doubleNote, true);
 								doubleNote.destroy();
 							} else
@@ -3274,7 +3270,6 @@ class PlayState extends MusicBeatState
 		//Dupe note remove
 		notes.forEachAlive(function(note:Note) {
 			if (daNote != note && daNote.mustPress && daNote.noteData == note.noteData && daNote.isSustainNote == note.isSustainNote && Math.abs(daNote.strumTime - note.strumTime) < 1) {
-				note.kill();
 				notes.remove(note, true);
 				note.destroy();
 			}
@@ -3403,9 +3398,74 @@ class PlayState extends MusicBeatState
 
 		if (!note.isSustainNote)
 		{
-			note.kill();
 			notes.remove(note, true);
 			note.destroy();
+		}
+	}
+
+	function goodNoteHitOptimized(note:Note):Void
+	{
+		if (!note.wasGoodHit)
+		{
+			if(cpuControlled && (note.ignoreNote || note.hitCausesMiss)) return;
+
+			if(note.hitCausesMiss) {
+				noteMiss(note);
+				if(!note.noteSplashDisabled && !note.isSustainNote) {
+					spawnNoteSplashOnNote(false, note);
+				}
+
+				if(!note.noMissAnimation)
+				{
+					switch(note.noteType) {
+						case 'Hurt Note': //Hurt note
+							if(boyfriend.animation.getByName('hurt') != null) {
+								boyfriend.playAnim('hurt', true);
+								boyfriend.specialAnim = true;
+							}
+					}
+				}
+
+				note.wasGoodHit = true;
+				if (!note.isSustainNote)
+				{
+					notes.remove(note, true);
+					note.destroy();
+				}
+				return;
+			}
+			if (!note.isSustainNote && cpuControlled)
+			{
+				songScore += 500 * Std.int(healthGain);
+				if(combo > 9999) combo = 9999;
+				popUpScore(note);
+			}
+			health += note.hitHealth * healthGain * healthGain;
+			if(cpuControlled) {
+				var time:Float = 0.15 / playbackRate;
+				if(note.isSustainNote && !note.animation.curAnim.name.endsWith('end')) {
+					time += 0.15;
+			} else {
+				var spr = playerStrums.members[note.noteData];
+				if(spr != null)
+				{
+					spr.playAnim('confirm', true);
+				}
+			}
+			note.wasGoodHit = true;
+			vocals.volume = 1;
+
+			var isSus:Bool = note.isSustainNote; //GET OUT OF MY HEAD, GET OUT OF MY HEAD, GET OUT OF MY HEAD
+			var leData:Int = Math.round(Math.abs(note.noteData));
+			var leType:String = note.noteType;
+
+			callOnLuas('goodNoteHit', [notes.members.indexOf(note), Math.abs(note.noteData), note.noteType, note.isSustainNote]);
+
+			if (!note.isSustainNote)
+			{
+				notes.remove(note, true);
+				note.destroy();
+			}
 		}
 	}
 
@@ -3440,7 +3500,6 @@ class PlayState extends MusicBeatState
 				note.wasGoodHit = true;
 				if (!note.isSustainNote)
 				{
-					note.kill();
 					notes.remove(note, true);
 					note.destroy();
 				}
@@ -3510,7 +3569,6 @@ class PlayState extends MusicBeatState
 
 			if (!note.isSustainNote)
 			{
-				note.kill();
 				notes.remove(note, true);
 				note.destroy();
 			}
