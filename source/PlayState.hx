@@ -3412,7 +3412,7 @@ class PlayState extends MusicBeatState
 			if(note.hitCausesMiss) {
 				noteMiss(note);
 				if(!note.noteSplashDisabled && !note.isSustainNote) {
-					spawnNoteSplashOnNote(false, note);
+					spawnNoteSplashOnNote(note);
 				}
 
 				if(!note.noMissAnimation)
