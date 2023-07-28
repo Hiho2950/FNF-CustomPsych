@@ -148,7 +148,7 @@ final class FunkinScript extends tea.SScript
 			return FlxColor.fromRGB(r, b, g);
 		});
     }
-    public function callOnScript(funcCall:String, ?funcArgs:Array<Dynamic> = null):SCall
+    public function callOnScript(funcCall:String, ?funcArgs:Array<Dynamic> = null):Dynamic
 	{
 		var callValue = call(funcCall, funcArgs);
 		if (callValue.succeeded)
