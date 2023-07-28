@@ -159,8 +159,7 @@ final class FunkinScript extends tea.SScript
 			if (e != null)
 			{
 				var msg:String = e.toString();
-				if(parentLua != null) msg = scriptname + ":" + funcCall + " - " + msg;
-				else msg = '$interpName - $msg';
+				msg = scriptname + ":" + funcCall + " - " + msg;
                 PlayState.instance.addTextToDebug(msg, FlxColor.RED);
 			}
 			return null;
