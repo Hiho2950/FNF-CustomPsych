@@ -49,8 +49,7 @@ class FlxSoundGroup
 	{
 		if (sounds.indexOf(sound) >= 0)
 		{
-			if (sound.group != null) // tf
-				sound.group = null;
+			sound.group = null;
 			return sounds.remove(sound);
 		}
 		return false;
