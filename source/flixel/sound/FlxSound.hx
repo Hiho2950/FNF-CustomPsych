@@ -1,7 +1,7 @@
 package flixel.sound;
 
-import flash.events.Event;
 import flash.events.IEventDispatcher;
+import flash.events.Event;
 import flash.media.Sound;
 import flash.media.SoundChannel;
 import flash.media.SoundTransform;
@@ -19,9 +19,6 @@ import flash.utils.ByteArray;
 #end
 #if (openfl >= "8.0.0")
 import openfl.utils.AssetType;
-#end
-#if lime
-import lime.media.AudioBuffer;
 #end
 
 /**
@@ -55,16 +52,6 @@ class FlxSound extends FlxBasic
 	 * The ID3 artist name. Defaults to null. Currently only works for streamed sounds.
 	 */
 	public var artist(default, null):String;
-
-	/**
-	 * Stores for how much channels are in the loaded sound.
-	 */
-	public var channels(get, null):Int;
-
-	/**
-	 * Stores the sound lime AudioBuffer.
-	 */
-	public var buffer(get, null):#if lime AudioBuffer #else Dynamic #end;
 
 	/**
 	 * Stores the average wave amplitude of both stereo channels
@@ -106,32 +93,12 @@ class FlxSound extends FlxBasic
 	 * Set volume to a value between 0 and 1 to change how this sound is.
 	 */
 	public var volume(get, set):Float;
-
-	/**
-	 * Internal tracker for amplitudeLeft.
-	 */
-	var _amplitudeLeft:Float;
-
-	/**
-	 * Internal tracker for amplitudeRight.
-	 */
-	var _amplitudeRight:Float;
-
-	/**
-	 * Internal tracker for sound last position on when amplitude was used.
-	 */
-	var _amplitudeTime:Float;
-
-	/**
-	 * Internal tracker for amplitude update debounce.
-	 */
-	var _amplitudeUpdate:Bool;
-
+	#if FLX_PITCH
 	/**
 	 * Set pitch, which also alters the playback speed. Default is 1.
 	 */
 	public var pitch(get, set):Float;
-
+	#end
 	/**
 	 * The position in runtime of the music playback in milliseconds.
 	 * If set while paused, changes only come into effect after a `resume()` call.
@@ -208,12 +175,12 @@ class FlxSound extends FlxBasic
 	 * Internal tracker for sound length, so that length can still be obtained while a sound is paused, because _sound becomes null.
 	 */
 	var _length:Float = 0;
-
+	#if FLX_PITCH
 	/**
 	 * Internal tracker for pitch.
 	 */
 	var _pitch:Float = 1.0;
-
+	#end
 	/**
 	 * Internal tracker for total volume adjustment.
 	 */
@@ -261,7 +228,6 @@ class FlxSound extends FlxBasic
 		_time = 0;
 		_paused = false;
 		_volume = 1.0;
-		_pitch = 1.0;
 		_volumeAdjust = 1.0;
 		looped = false;
 		loopTime = 0.0;
@@ -269,7 +235,6 @@ class FlxSound extends FlxBasic
 		_target = null;
 		_radius = 0;
 		_proximityPan = false;
-		_amplitudeUpdate = true;
 		visible = false;
 		amplitude = 0;
 		amplitudeLeft = 0;
@@ -315,8 +280,6 @@ class FlxSound extends FlxBasic
 	{
 		if (!playing)
 			return;
-
-		_amplitudeUpdate = true;
 
 		_time = _channel.position;
 
@@ -465,6 +428,9 @@ class FlxSound extends FlxBasic
 		updateTransform();
 		exists = true;
 		onComplete = OnComplete;
+		#if FLX_PITCH
+		pitch = 1;
+		#end
 		_length = (_sound == null) ? 0 : _sound.length;
 		endTime = _length;
 		return this;
@@ -619,29 +585,14 @@ class FlxSound extends FlxBasic
 	/**
 	 * Call after adjusting the volume to update the sound channel's settings.
 	 */
-	@:allow(flixel.sound.FlxSoundGroup)
+	@:allow(flixel.system.FlxSoundGroup)
 	function updateTransform():Void
 	{
-		if (_transform == null) // sword could do something better ik
-			return;
-
 		_transform.volume = #if FLX_SOUND_SYSTEM (FlxG.sound.muted ? 0 : 1) * FlxG.sound.volume * #end
 			(group != null ? group.volume : 1) * _volume * _volumeAdjust;
 
 		if (_channel != null)
-		{
 			_channel.soundTransform = _transform;
-
-			@:privateAccess
-			if (_channel.__source != null)
-			{
-				#if cpp
-				@:privateAccess
-				this._channel.__source.__backend.setPitch(_pitch);
-				// trace('changing $name pitch new $_pitch');
-				#end
-			}
-		}
 	}
 
 	/**
@@ -658,7 +609,7 @@ class FlxSound extends FlxBasic
 		_channel = _sound.play(_time, 0, _transform);
 		if (_channel != null)
 		{
-			#if (sys && openfl_legacy)
+			#if FLX_PITCH
 			pitch = _pitch;
 			#end
 			_channel.addEventListener(Event.SOUND_COMPLETE, stopped);
@@ -784,73 +735,27 @@ class FlxSound extends FlxBasic
 		updateTransform();
 		return Volume;
 	}
-
-	function get_loaded():Bool
-	{
-		return #if lime buffer != null #else _sound != null #end;
-	}
-
-	function get_channels():Int
-	{
-		@:privateAccess return (buffer == null) ? 0 : buffer.channels;
-	}
-
-	function get_stereo():Bool
-	{
-		return channels > 1;
-	}
-
-	function get_buffer():#if lime AudioBuffer #else Dynamic #end
-	{
-		#if lime
-		@:privateAccess if (_sound != null)
-			return _sound.__buffer;
-		#end
-		return null;
-	}
-
-	function update_amplitude():Void
-	{
-		if (_channel == null || _time == _amplitudeTime || !_amplitudeUpdate)
-			return;
-		@:privateAccess {
-			_channel.__updatePeaks();
-
-			_amplitudeLeft = _channel.__leftPeak;
-			_amplitudeRight = _channel.__rightPeak;
-		}
-
-		_amplitudeTime = _time;
-		_amplitudeUpdate = false;
-	}
-
-	function get_amplitudeLeft():Float
-	{
-		update_amplitude();
-		return _amplitudeLeft;
-	}
-
-	function get_amplitudeRight():Float
-	{
-		update_amplitude();
-		return _amplitudeRight;
-	}
-
-	function get_amplitude():Float
-	{
-		update_amplitude();
-		return channels > 1 ? (_amplitudeLeft + _amplitudeRight) * 0.5 : _amplitudeLeft;
-	}
-
+	#if FLX_PITCH
 	inline function get_pitch():Float
 	{
 		return _pitch;
 	}
+	
 
 	function set_pitch(v:Float):Float
 	{
+		if (_channel != null)
+			#if openfl_legacy
+			_channel.pitch = v;
+			#else
+			@:privateAccess
+			if (_channel.__source != null)
+				_channel.__source.pitch = v;
+			#end
+
 		return _pitch = v;
 	}
+	#end
 
 	inline function get_pan():Float
 	{
@@ -888,8 +793,7 @@ class FlxSound extends FlxBasic
 			LabelValuePair.weak("playing", playing),
 			LabelValuePair.weak("time", time),
 			LabelValuePair.weak("length", length),
-			LabelValuePair.weak("volume", volume),
-			LabelValuePair.weak("pitch", pitch)
+			LabelValuePair.weak("volume", volume)
 		]);
 	}
 }
