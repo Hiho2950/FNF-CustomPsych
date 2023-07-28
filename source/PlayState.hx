@@ -3440,11 +3440,12 @@ class PlayState extends MusicBeatState
 				if(combo > 9999) combo = 9999;
 				popUpScore(note);
 			}
-			health += note.hitHealth * healthGain * healthGain;
+			health += note.hitHealth * healthGain;
 			if(cpuControlled) {
 				var time:Float = 0.15 / playbackRate;
 				if(note.isSustainNote && !note.animation.curAnim.name.endsWith('end')) {
 					time += 0.15;
+				}
 			} else {
 				var spr = playerStrums.members[note.noteData];
 				if(spr != null)
