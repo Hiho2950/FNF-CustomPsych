@@ -530,6 +530,12 @@ class PlayState extends MusicBeatState
 						luaArray.push(new FunkinLua(folder + file));
 						filesPushed.push(file);
 					}
+
+					if(file.endsWith('.hx') && !filesPushed.contains(file))
+					{
+						hxArray.push(new FunkinScript(folder + file));
+						filesPushed.push(file);
+					}
 				}
 			}
 		}
@@ -677,6 +683,20 @@ class PlayState extends MusicBeatState
 					luaArray.push(new FunkinLua(luaToLoad));
 				}
 			}
+
+			var luaToLoad:String = Paths.modFolders('custom_notetypes/' + notetype + '.hx');
+			if(FileSystem.exists(luaToLoad))
+			{
+				hxArray.push(new FunkinScript(luaToLoad));
+			}
+			else
+			{
+				luaToLoad = SUtil.getPath() + Paths.getPreloadPath('custom_notetypes/' + notetype + '.hx');
+				if(FileSystem.exists(luaToLoad))
+				{
+					hxArray.push(new FunkinScript(luaToLoad));
+				}
+			}
 		}
 		for (event in eventPushedMap.keys())
 		{
@@ -691,6 +711,20 @@ class PlayState extends MusicBeatState
 				if(FileSystem.exists(luaToLoad))
 				{
 					luaArray.push(new FunkinLua(luaToLoad));
+				}
+			}
+
+			var luaToLoad:String = Paths.modFolders('custom_events/' + event + '.hx');
+			if(FileSystem.exists(luaToLoad))
+			{
+				hxArray.push(new FunkinScript(luaToLoad));
+			}
+			else
+			{
+				luaToLoad = SUtil.getPath() + Paths.getPreloadPath('custom_events/' + event + '.lua');
+				if(FileSystem.exists(luaToLoad))
+				{
+					hxArray.push(new FunkinScript(luaToLoad));
 				}
 			}
 		}
@@ -844,6 +878,12 @@ class PlayState extends MusicBeatState
 					if(file.endsWith('.lua') && !filesPushed.contains(file))
 					{
 						luaArray.push(new FunkinLua(folder + file));
+						filesPushed.push(file);
+					}
+
+					if(file.endsWith('.hx') && !filesPushed.contains(file))
+					{
+						hxArray.push(new FunkinScript(folder + file));
 						filesPushed.push(file);
 					}
 				}
@@ -3446,6 +3486,7 @@ class PlayState extends MusicBeatState
 				if(note.isSustainNote && !note.animation.curAnim.name.endsWith('end')) {
 					time += 0.15;
 				}
+				StrumPlayAnim(false, Std.int(Math.abs(note.noteData)), time);
 			} else {
 				var spr = playerStrums.members[note.noteData];
 				if(spr != null)
@@ -3784,6 +3825,18 @@ class PlayState extends MusicBeatState
 				returnVal = myValue;
 			}
 		}
+		for (script in hxArray) {
+			if(exclusions.contains(script.scriptname))
+				continue;
+
+			var myValue = script.callOnScript(event, args);
+			if(myValue == FunkinScript.Function_Stop && !ignoreStops)
+				break;
+			
+			if(myValue != null && myValue != FunkinScript.Function_Stop) {
+				returnVal = myValue;
+			}
+		}
 		#end
 		return returnVal;
 	}
@@ -3792,6 +3845,9 @@ class PlayState extends MusicBeatState
 		#if LUA_ALLOWED
 		for (i in 0...luaArray.length) {
 			luaArray[i].set(variable, arg);
+		}
+		for (i in 0...hxArray.length) {
+			hxArray[i].set(variable, arg);
 		}
 		#end
 	}
