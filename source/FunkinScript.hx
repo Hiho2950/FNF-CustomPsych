@@ -158,7 +158,7 @@ final class FunkinScript extends tea.SScript
 			var e = callValue.exceptions[0];
 			if (e != null)
 			{
-				if (exists(func)) {
+				if (exists(funcCall)) {
 					var msg:String = e.toString();
 				    msg = scriptname + ":" + funcCall + " - " + msg;
                     PlayState.instance.addTextToDebug(msg, FlxColor.RED);
