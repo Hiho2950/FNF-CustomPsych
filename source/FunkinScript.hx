@@ -158,7 +158,6 @@ final class FunkinScript extends tea.SScript
 			var e = callValue.exceptions[0];
 			if (e != null)
 			{
-				var msg:String = e.toString();
 			    if (exists(funcCall)) {
 				    var msg:String = CoolUtil.getFirstLine(e.toString());
 				    msg = scriptname + ":" + funcCall + " - " + msg;
