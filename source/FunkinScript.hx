@@ -150,19 +150,14 @@ final class FunkinScript extends tea.SScript
     }
     public function callOnScript(funcCall:String, ?funcArgs:Array<Dynamic> = null):Dynamic
 	{
-		var callValue = call(funcCall, funcArgs);
-		if (callValue.succeeded)
-			return callValue;
-		else
-		{
-			var e = callValue.exceptions[0];
-			if (e != null)
-			{
-				if (exists(funcCall)) {
-					var msg:String = e.toString();
-				    msg = scriptname + ":" + funcCall + " - " + msg;
-                    PlayState.instance.addTextToDebug(msg, FlxColor.RED);
-				}
+		try {
+			var callValue = call(funcCall, funcArgs);
+		    return callValue.returnValue;
+		} catch (e:Dynamic) {
+			if (exists(funcCall)) {
+				var msg:String = CoolUtil.getFirstLine(e.toString());
+				msg = scriptname + ":" + funcCall + " - " + msg;
+                PlayState.instance.addTextToDebug(msg, FlxColor.RED);
 			}
 			return null;
 		}

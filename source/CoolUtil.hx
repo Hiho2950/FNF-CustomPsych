@@ -151,4 +151,11 @@ class CoolUtil
 			+ '/'
 			+ FlxSave.validate(FlxG.stage.application.meta.get('file')) #end;
 	}
+	public static function getFirstLine(input: String): String {
+        // Find the index of the first newline character (if any)
+        var newlineIndex = input.indexOf("\n");
+        
+        // Return the first line if a newline character is found, otherwise return the whole string
+        return (newlineIndex != -1) ? input.substring(0, newlineIndex) : input;
+    }
 }

@@ -3476,6 +3476,37 @@ class PlayState extends MusicBeatState
 				}
 				return;
 			}
+			if(!note.noAnimation) {
+				var animToPlay:String = singAnimations[Std.int(Math.abs(note.noteData))];
+
+				if(note.gfNote)
+				{
+					if(gf != null)
+					{
+						gf.playAnim(animToPlay + note.animSuffix, true);
+						gf.holdTimer = 0;
+					}
+				}
+				else
+				{
+					boyfriend.playAnim(animToPlay + note.animSuffix, true);
+					boyfriend.holdTimer = 0;
+				}
+
+				if(note.noteType == 'Hey!') {
+					if(boyfriend.animOffsets.exists('hey')) {
+						boyfriend.playAnim('hey', true);
+						boyfriend.specialAnim = true;
+						boyfriend.heyTimer = 0.6;
+					}
+
+					if(gf != null && gf.animOffsets.exists('cheer')) {
+						gf.playAnim('cheer', true);
+						gf.specialAnim = true;
+						gf.heyTimer = 0.6;
+					}
+				}
+			}
 			if (!note.isSustainNote && cpuControlled)
 			{
 				songScore += 500 * Std.int(healthGain);
