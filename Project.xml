@@ -106,6 +106,7 @@
 	<haxelib name="flixel-addons" />
 	<haxelib name="hscript" />
 	<define name="hscriptPos" />
+	<haxedef name="openflPos"/>
 
 	<!--In case you want to use the ui package-->
 	<haxelib name="flixel-ui" />
