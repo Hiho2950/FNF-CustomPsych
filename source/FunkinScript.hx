@@ -152,7 +152,7 @@ final class FunkinScript extends tea.SScript
 	{
 		var callValue = call(funcCall, funcArgs);
 		if (callValue.succeeded)
-		    return callValue;
+		    return callValue.returnValue;
 		else
 		{
 			var e = callValue.exceptions[0];
@@ -163,8 +163,8 @@ final class FunkinScript extends tea.SScript
 				    msg = scriptname + ":" + funcCall + " - " + msg;
                     PlayState.instance.addTextToDebug(msg, FlxColor.RED);
 			    }
-			    return null;
 			}
+			return null;
 		}
 	}
 }
