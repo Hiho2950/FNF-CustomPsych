@@ -160,7 +160,6 @@ class Main extends Sprite
     #if desktop
 		DiscordClient.shutdown
 	 #end
-		Sys.exit(1);
 	}
 	#end
 }

@@ -119,7 +119,6 @@ class SUtil
 		Sys.println("Making a simple alert ...");
 
 		SUtil.applicationAlert("Uncaught Error :(!", errMsg);
-		System.exit(0);
 	}
 
 	private static function applicationAlert(title:String, description:String)
