@@ -23,6 +23,13 @@ import lime.app.Application;
 import openfl.Assets;
 import openfl.Lib;
 
+import modcharting.Modifier;
+import modcharting.PlayfieldRenderer;
+import modcharting.NoteMovement;
+import modcharting.ModchartUtil;
+import modcharting.NotePositionData;
+import Math;
+
 final class FunkinScript extends tea.SScript
 {
     public static final Function_Stop:Null<Int> = 1;
@@ -106,7 +113,7 @@ final class FunkinScript extends tea.SScript
 			return false;
 		});
 
-		set('add', function(obj:FlxBasic) PlayState.instance.add(obj));
+		set('add', function(obj:FlxBasic) PlayState.instance.addToGame(obj));
 		set('insert', function(pos:Int, obj:FlxBasic) PlayState.instance.insert(pos, obj));
 		set('remove', function(obj:FlxBasic, splice:Bool = false) PlayState.instance.remove(obj, splice));
 
@@ -146,6 +153,14 @@ final class FunkinScript extends tea.SScript
 		{
 			return FlxColor.fromRGB(r, b, g);
 		});
+
+		set('Math', Math);
+        set('PlayfieldRenderer', PlayfieldRenderer);
+        set('ModchartUtil', ModchartUtil);
+        set('Modifier', Modifier);
+        set('NoteMovement', NoteMovement);
+        set('NotePositionData', NotePositionData);
+        set('ModchartFile', ModchartFile);
     }
     public function callOnScript(funcCall:String, ?funcArgs:Array<Dynamic> = null):Dynamic
 	{

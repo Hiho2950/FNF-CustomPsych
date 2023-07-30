@@ -89,6 +89,10 @@ import vlc.MP4Handler;
 #end
 #end
 
+import modcharting.ModchartFuncs;
+import modcharting.NoteMovement;
+import modcharting.PlayfieldRenderer;
+
 using StringTools;
 
 class PlayState extends MusicBeatState
@@ -650,7 +654,6 @@ class PlayState extends MusicBeatState
 
 		strumLineNotes = new FlxTypedGroup<StrumNote>();
 		add(strumLineNotes);
-		add(grpNoteSplashes);
 
 		if(ClientPrefs.timeBarType == 'Song Name')
 		{
@@ -668,6 +671,11 @@ class PlayState extends MusicBeatState
 		// startCountdown();
 
 		generateSong(SONG.song);
+
+        playfieldRenderer = new PlayfieldRenderer(strumLineNotes, notes, this);
+        playfieldRenderer.cameras = [camHUD];
+        add(playfieldRenderer);
+        add(grpNoteSplashes);
 
 		#if LUA_ALLOWED
 		for (notetype in noteTypeMap.keys())
@@ -929,6 +937,9 @@ class PlayState extends MusicBeatState
 			FlxG.stage.addEventListener(KeyboardEvent.KEY_DOWN, onKeyPress);
 			FlxG.stage.addEventListener(KeyboardEvent.KEY_UP, onKeyRelease);
 		}
+
+		ModchartFuncs.loadLuaFunctions();
+
 		callOnLuas('onCreatePost', []);
 
 		super.create();
@@ -1291,6 +1302,9 @@ class PlayState extends MusicBeatState
 			#end
 			generateStaticArrows(0);
 			generateStaticArrows(1);
+
+            NoteMovement.getDefaultStrumPos(this);
+
 			for (i in 0...playerStrums.length) {
 				setOnLuas('defaultPlayerStrumX' + i, playerStrums.members[i].x);
 				setOnLuas('defaultPlayerStrumY' + i, playerStrums.members[i].y);
@@ -2212,7 +2226,7 @@ class PlayState extends MusicBeatState
 						if(!daNote.blockHit && daNote.mustPress && cpuControlled && daNote.canBeHit) {
 							if(daNote.isSustainNote) {
 								if(daNote.canBeHit) {
-									goodNoteHitOptimized(daNote);
+									goodNoteHit(daNote);
 								}
 							} else if(daNote.strumTime <= Conductor.songPosition || daNote.isSustainNote) {
 								goodNoteHit(daNote);
@@ -3445,7 +3459,7 @@ class PlayState extends MusicBeatState
 		}
 	}
 
-	function goodNoteHitOptimized(note:Note):Void
+	function goodNoteHit(note:Note):Void
 	{
 		if (!note.wasGoodHit)
 		{
@@ -3544,7 +3558,7 @@ class PlayState extends MusicBeatState
 		}
 	}
 
-	function goodNoteHit(note:Note):Void
+	/*function goodNoteHit(note:Note):Void
 	{
 		if (!note.wasGoodHit)
 		{
@@ -3648,7 +3662,7 @@ class PlayState extends MusicBeatState
 				note.destroy();
 			}
 		}
-	}
+	}*/
 
 	public function spawnNoteSplashOnNote(note:Note) {
 		if(ClientPrefs.noteSplashes && note != null) {
@@ -4022,4 +4036,8 @@ class PlayState extends MusicBeatState
 
 	var curLight:Int = -1;
 	var curLightEvent:Int = -1;
+
+	public function addToGame(obj:FlxBasic) {
+		return add(obj);
+	}
 }
