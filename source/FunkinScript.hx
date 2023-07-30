@@ -28,6 +28,7 @@ import modcharting.PlayfieldRenderer;
 import modcharting.NoteMovement;
 import modcharting.ModchartUtil;
 import modcharting.NotePositionData;
+import modcharting.ModchartFile;
 import Math;
 
 final class FunkinScript extends tea.SScript
