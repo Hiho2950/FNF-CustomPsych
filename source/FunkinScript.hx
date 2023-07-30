@@ -106,10 +106,9 @@ final class FunkinScript extends tea.SScript
 			return false;
 		});
 
-		set('addToGame', function(FlxBasic:FlxBasic)
-		{
-			return PlayState.instance.add(FlxBasic);
-		});
+		set('add', function(obj:FlxBasic) PlayState.instance.add(obj));
+		set('insert', function(pos:Int, obj:FlxBasic) PlayState.instance.insert(pos, obj));
+		set('remove', function(obj:FlxBasic, splice:Bool = false) PlayState.instance.remove(obj, splice));
 
 		set('get', function(id:String)
 		{
