@@ -37,6 +37,10 @@ final class FunkinScript extends tea.SScript
 	public static final Function_Continue:Null<Int> = 0;
 
     public var scriptname = "";
+
+	public var defaultClassSupport:Bool = true;
+
+	public var classSupport:Bool = true;
 	
 	public function new(?scriptFile:String = "", ?preset:Bool = true)
 	{
