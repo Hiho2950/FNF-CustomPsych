@@ -42,7 +42,7 @@ final class FunkinScript extends tea.SScript
 	{
 		traces = true;
 		classSupport = true;
-		defaultClassSupport = true;
+		//defaultClassSupport‎ = true;
 
         scriptname = scriptFile;
 
